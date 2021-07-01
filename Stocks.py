@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
 
 
 import math
@@ -12,8 +11,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-
-# In[2]:
 
 
 import os
@@ -29,33 +26,18 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 import pmdarima as pm
 
 
-# In[4]:
-
 
 sbin = get_history(symbol='SBIN',
-                   start=date(2000,1,1),
+                   start=date(2000,1,1),                             ##importing stocks dataset
                    end=date(2020,11,1))
 
 
-# In[ ]:
 
-
-
-
-
-# In[5]:
 
 
 sbin.shape
-
-
-# In[7]:
-
-
 sbin.head(5)
 
-
-# In[8]:
 
 
 plt.figure(figsize=(10,6))
@@ -67,8 +49,6 @@ plt.title('SBIN closing price')
 plt.show()
 
 
-# In[9]:
-
 
 plt.figure(figsize=(10,6))
 df_close = sbin['Close']
@@ -77,7 +57,6 @@ plt.title('Scatter plot of closing price')
 plt.show()
 
 
-# In[10]:
 
 
 plt.figure(figsize=(10,6))
@@ -87,7 +66,11 @@ plt.title('Hisogram of closing price')
 plt.show()
 
 
-# In[11]:
+
+
+##ARIMA MODEL###
+
+
 
 
 from statsmodels.tsa.stattools import adfuller
@@ -114,7 +97,6 @@ def test_stationarity(timeseries):
 test_stationarity(sbin['Close'])
 
 
-# In[12]:
 
 
 result = seasonal_decompose(df_close, model='multiplicative', freq = 30)
@@ -123,7 +105,6 @@ fig = result.plot()
 fig.set_size_inches(16, 9)
 
 
-# In[13]:
 
 
 from pylab import rcParams
@@ -140,8 +121,6 @@ plt.legend()
 plt.show()
 
 
-# In[14]:
-
 
 train_data, test_data = df_log[3:int(len(df_log)*0.9)], df_log[int(len(df_log)*0.9):]
 plt.figure(figsize=(10,6))
@@ -153,7 +132,7 @@ plt.plot(test_data, 'blue', label='Test data')
 plt.legend()
 
 
-# In[15]:
+
 
 
 model_autoARIMA = auto_arima(train_data, start_p=0, start_q=0,
@@ -171,14 +150,14 @@ stepwise=True)
 print(model_autoARIMA.summary())
 
 
-# In[16]:
+
 
 
 model_autoARIMA.plot_diagnostics(figsize=(15,8))
 plt.show()
 
 
-# In[27]:
+
 
 
 warnings.filterwarnings("ignore")
@@ -187,15 +166,9 @@ fitted = model.fit(disp=-1)
 print(fitted.summary())
 
 
-# In[28]:
-
-
-# Forecast
-
 fc, se, conf = fitted.forecast(519, alpha=0.05)  # 95% confidence
 
 
-# In[100]:
 
 
 fc_series = pd.Series(fc, index=test_data.index)
@@ -214,8 +187,6 @@ plt.legend(loc='upper left', fontsize=8)
 plt.show()
 
 
-# In[30]:
-
 
 # report performance
 mse = mean_squared_error(test_data, fc)
@@ -228,16 +199,14 @@ mape = np.mean(np.abs(fc - test_data)/np.abs(test_data))
 print('MAPE: '+str(mape))
 
 
-# In[31]:
-
-
+"""
 import sys
 print(sys.executable)
 print(sys.version)
 print(sys.version_info)
+"""
 
-
-# In[32]:
+## LSTM MODEL ##
 
 
 from keras.models import Sequential
@@ -245,15 +214,8 @@ from keras.layers import Dense,Dropout, Flatten,LSTM,RepeatVector,TimeDistribute
 from keras.callbacks import EarlyStopping
 #from keras.optimizers import Adam
 from tensorflow.keras.optimizers import Adam
-
 from livelossplot.keras import PlotLossesCallback
-
 from statsmodels.tsa.seasonal import seasonal_decompose
-
-
-# In[37]:
-
-
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import model_selection
 from sklearn.metrics import confusion_matrix
@@ -261,20 +223,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 
-# In[36]:
 
 
 sbin.head()
-
-
-# In[43]:
-
-
 sbin['Date'] = sbin.index
 sbin.head()
 
-
-# In[40]:
 
 
 data2 = pd.DataFrame(columns = ['Date', 'Open', 'High', 'Low', 'Close'])
@@ -285,44 +239,25 @@ data2['Low'] = sbin['Low']
 data2['Close'] = sbin['Close']
 
 
-# In[41]:
-
 
 data2.head()
 
 
-# In[44]:
 
-
-train_set = data2.iloc[:, 1:2].values
-
-
-# In[47]:
+train_set = data2.iloc[:, 1:2].values                   ## abhi open price predicting but can be changed to close price prediction appropriately
 
 
 train_set.shape
 
-
-# In[48]:
-
-
 data2.shape
-
-
-# In[49]:
 
 
 train_set
 
 
-# In[50]:
-
-
 sc = MinMaxScaler(feature_range = (0, 1))
 training_set_scaled = sc.fit_transform(train_set)
 
-
-# In[69]:
 
 
 X_train = []
@@ -334,7 +269,6 @@ X_train, y_train = np.array(X_train), np.array(y_train)
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 
 
-# In[54]:
 
 
 """"
@@ -348,29 +282,26 @@ i=60
 """    
 
 
-# In[101]:
 
 
 regressor = Sequential()
 regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
-regressor.add(Dropout(0.05))
+regressor.add(Dropout(0.15))
 regressor.add(LSTM(units = 50, return_sequences = True))
-regressor.add(Dropout(0.05))
+regressor.add(Dropout(0.15))
 regressor.add(LSTM(units = 50, return_sequences = True))
-regressor.add(Dropout(0.05))
+regressor.add(Dropout(0.15))
 regressor.add(LSTM(units = 50))
-regressor.add(Dropout(0.05))
+regressor.add(Dropout(0.15))
 regressor.add(Dense(units = 1))
 
 
-# In[102]:
 
 
 regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
 regressor.fit(X_train, y_train, epochs = 100, batch_size = 32)
 
 
-# In[103]:
 
 
 testdataframe = get_history(symbol='SBIN',
@@ -378,19 +309,17 @@ testdataframe = get_history(symbol='SBIN',
                    end=date(2021,11,1))
 
 
-# In[104]:
 
 
 testdataframe.head()
 
 
-# In[105]:
+
 
 
 testdataframe.shape
 
 
-# In[106]:
 
 
 testdataframe['Date'] = testdataframe.index
@@ -415,14 +344,12 @@ X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
 
-# In[107]:
 
 
 predicted_stock_price = regressor.predict(X_test)
 predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 
 
-# In[108]:
 
 
 plt.figure(figsize=(20,10))
@@ -435,7 +362,6 @@ plt.legend()
 plt.show()
 
 
-# In[98]:
 
 
 #Previous
@@ -447,15 +373,6 @@ plt.xlabel('Trading Day')
 plt.ylabel('SBI Stock Price')
 plt.legend()
 plt.show()
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
 
 
 
