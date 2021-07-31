@@ -6,4 +6,4 @@ Models that we will use are:
 1. Arima
 2. LSTM
 
-Follow the Jupyter notebook uploaded in the stocks.py for the complete analysis
+Follow the Jupyter notebook uploaded in the RELIANCE_stocks.ipynb for the complete analysis
