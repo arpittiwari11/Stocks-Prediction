@@ -6,4 +6,4 @@ Models that we will use are:
 1. Arima
 2. LSTM
 
-Follow the Jupyter notebook 
+Follow the Jupyter notebook uploaded in the stocks.py for the complete analysis
