@@ -5,3 +5,5 @@ Stocks data is a time series data and hence we'll use various state-of-the-art m
 Models that we will use are:
 1. Arima
 2. LSTM
+
+Follow the Jupyter notebook 
